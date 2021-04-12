@@ -23,8 +23,8 @@ const options = [
 ]
 
 const orders = [
-    {order_id: 1, user_id: 1, food_id: 5, count: 8},
-    {order_id: 2, user_id: 1, food_id: 2, count: 10},
-    {order_id: 4, user_id: 2, food_id: 3, count: 7},
-    {order_id: 6, user_id: 2, food_id: 4, count: 9}
+    {user_id: 1, food_id: 5, count: 8},
+    {user_id: 1, food_id: 2, count: 10},
+    {user_id: 2, food_id: 3, count: 7},
+    {user_id: 2, food_id: 4, count: 9}
 ]
