@@ -291,6 +291,9 @@ img {
 .right-side .top-wrapper h1 {
     margin-left: 30px;
 }
+.right-side .top-wrapper h1:first-child {
+    margin-right: 200px;
+}
 .orders-wrapper {
     height: 340px;
     margin-top: 10px;

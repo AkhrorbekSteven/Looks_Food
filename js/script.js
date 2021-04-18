@@ -7,65 +7,18 @@ const addPhoneInput = document.querySelector('.add-phone-input')
 const addOrderForm = document.querySelector('.add-order-box')
 const amountInput = document.querySelector('.amount-input')
 const person = document.querySelector('.person')
-let id
+const clientId = document.querySelector('#clientId')
 
 function optionsRenderer (array) {
     for (let element of array) {
         let newOption = document.createElement('option')
 
-        newOption.value = element.option_id
-        newOption.innerText = element.option_name
+        newOption.value = element.food_id
+        newOption.innerText = element.food_name
 
         foodSelect.appendChild(newOption)
     }
 } 
-optionsRenderer(options)
-
-function foodsRenderer (array, optionsList, FoodsList) {
-    ordersWrapperList.innerHTML = null
-    for (let element of array) {
-        let newFoodItem = document.createElement('li')
-        let newImg = document.createElement('img')
-        let newSpan = document.createElement('span')
-        let newFoodName = document.createElement('h2')
-
-        newFoodItem.classList.add('food-thumb')
-        newSpan.classList.add('food-amount')
-        newFoodName.classList.add('food-name')
-
-        let found = optionsList.find((e) => e.option_id == element.food_id)
-        let found1 = FoodsList.find((e) => e.food_id == element.food_id)
-
-        newImg.src = found1.food_url
-        newSpan.innerText = element.count
-        newFoodName.innerText = found.option_name
-
-        newFoodItem.appendChild(newImg)
-        newFoodItem.appendChild(newSpan)
-        newFoodItem.appendChild(newFoodName)
-
-        ordersWrapperList.appendChild(newFoodItem)
-    }
-}
-foodsRenderer(orders, options, foods)
-
-addOrderForm.addEventListener('submit', (event) => {
-    event.preventDefault()
-    if (!(person.innerText == "No person selected yet")) {
-        let newOrder = {
-            user_id: id,
-            food_id: foodSelect.value,
-            count: amountInput.value
-        }
-        orders.push(newOrder)
-        let currentUser = orders.filter((e) => e.user_id == id)
-        foodsRenderer(currentUser, options, foods)
-        foodSelect.value = 1
-        amountInput.value = null
-    } else {
-        alert("please select a customer")
-    }
-})
 
 
 function usersRenderer (array) {
@@ -90,33 +43,82 @@ function usersRenderer (array) {
 
         usersList.appendChild(newUser)
 
-        ordersWrapperList.innerHTML = null
         newUser.addEventListener('click', () => {
             for (let e of usersList.childNodes) {
                 e.classList.remove('active')
             }
             newUser.classList.add('active')
+            clientId.innerText = element.user_id
             person.innerText = newUser.childNodes[1].innerText
-            let currentUser = orders.filter((e) => e.user_id == element.user_id)
-            foodsRenderer(currentUser, options, foods)
-            id = element.user_id
+            ordersRenderer(element.user_id)
         })
     }
 }
-usersRenderer(users)
+
+function ordersRenderer (userId) {
+    ordersWrapperList.innerHTML = null
+    for (let food of foods) {
+        for (let order of orders) {
+            if (food.food_id == order.food_id && order.user_id == userId) {
+                let newFoodItem = document.createElement('li')
+                let newImg = document.createElement('img')
+                let newSpan = document.createElement('span')
+                let newFoodName = document.createElement('h2')
+
+                newFoodItem.classList.add('food-thumb')
+                newSpan.classList.add('food-amount')
+                newFoodName.classList.add('food-name')
+
+                newImg.src = food.food_url
+                newSpan.innerText = order.count
+                newFoodName.innerText = food.food_name
+
+                newFoodItem.appendChild(newImg)
+                newFoodItem.appendChild(newSpan)
+                newFoodItem.appendChild(newFoodName)
+
+                ordersWrapperList.appendChild(newFoodItem)
+            }
+        }
+    }
+}
 
 addUserForm.addEventListener('submit', (event) => {
     event.preventDefault()
     let newUser = {
-        user_id: users.length + 1,
+        user_id: users[users.length - 1].user_id + 1,
         user_name: addNameInput.value,     
         phone_number: addPhoneInput.value      
     }
     users.push(newUser)
+    window.localStorage.setItem('usersData', JSON.stringify(users))
     usersRenderer(users)
     addNameInput.value = null
     addPhoneInput.value = null
-    person.innerText = 'No person selected yet'
+    person.innerText = 'Select a person'
+    clientId.innerText = ''
 })
 
+addOrderForm.addEventListener('submit', (event) => {
+    event.preventDefault()
+    if (clientId.textContent) {
+        let found =  orders.find(order => order.food_id == foodSelect.value && order.user_id == clientId.textContent)
+        if (found) {
+            found.count = parseInt(found.count) + parseInt(amountInput.value)
+        } else {
+            let newOrder = {
+                user_id: clientId.textContent,
+                food_id: foodSelect.value,
+                count: amountInput.value
+            }
+            orders.push(newOrder)
+        }
+        foodSelect.value = 1
+        amountInput.value = null
+        window.localStorage.setItem('ordersData', JSON.stringify(orders))
+        ordersRenderer(clientId.textContent)
+    }
+})
 
+optionsRenderer(foods)
+usersRenderer(users)
